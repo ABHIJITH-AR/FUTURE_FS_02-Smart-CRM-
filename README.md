@@ -1,7 +1,6 @@
 # Smart CRM - Client Lead Management System
 
-Smart CRM is a high-performance, full-stack, secure Customer Relationship Management (CRM) platform built on raw, pure JavaScript. It offers an elegant dark theme visual landscape, interactive SVG analytics, advanced lead pipeline management (CRUD), deep search filters, operator settings correction, and premium AI-powered predictive forecasting fueled directly by the **Gemini API**.
-
+Smart CRM is a secure, full-stack Customer Relationship Management platform. It features interactive SVG analytics, advanced lead pipeline management, and predictive forecasting.
 ---
 
 ## 🌟 Key Features & Capabilities
@@ -17,10 +16,10 @@ Smart CRM is a high-performance, full-stack, secure Customer Relationship Manage
 - **Client Lead Management (Full CRUD)**:
   - Create, view, modify, and delete customer prospect records with pristine transition animations.
   - Rich lead properties: Full Name, Email, Phone, Company, Estimated Deal Value ($), Lead Acquisition Source, Priority Level (High/Medium/Low), and detailed Notes.
-- **Advanced Gemini AI CRM Analysis**:
+- **Advanced AI CRM Analysis**:
   - Deep predictive forecasting that reads your current directory's sales pipeline and translates performance metrics.
   - Generates beautiful, structure-tailored Markdown reports on executive pipeline health, segment observations, and business growth advice.
-  - Smart automatic offline fallback if the Gemini API key is not yet configured.
+  - Smart automatic offline fallback if the API key is not yet configured.
 - **Complete Modular Customization**:
   - User settings form for instantly correcting operator profiles and changing security passcodes.
   - Real-time success and error feedback indicators.
@@ -29,7 +28,7 @@ Smart CRM is a high-performance, full-stack, secure Customer Relationship Manage
 
 ## 🏗️ Technical Architecture
 
-- **Frontend**: React 19, JavaScript (JSX), Vite Client-Side Bundler, Tailwind CSS 4, Motion, Lucide Icons
+- **Frontend**: React 19, JavaScript (JSX), Vite Client-Side Bundler, Tailwind CSS , Motion, Lucide Icons
 - **Backend / Routing**: Node.js, Express.js server, direct CommonJS compilation bundle with `esbuild`
 - **Database Indexing**: Secure, server-side concurrent JSON document engine (`data.json`) with automated seeding structures
 
@@ -40,7 +39,7 @@ Smart CRM is a high-performance, full-stack, secure Customer Relationship Manage
 ```bash
 ├── package.json         # Full-stack dependencies and build/dev runner scripts
 ├── vite.config.js       # Vite configuration serving SPA assets with path aliases
-├── server.js            # Node Express server coordinating API endpoints & Gemini integrations
+├── server.js            # Node Express server coordinating API endpoints & integrations
 ├── data.json            # Active database JSON storage document
 ├── server
 │   └── db.js            # Database interaction methods (users, sessions, clients CRUD)
@@ -55,7 +54,7 @@ Smart CRM is a high-performance, full-stack, secure Customer Relationship Manage
 │       ├── Navbar.jsx   # Top status header & operators profile details
 │       ├── DashboardView.jsx # Dynamic stats, SVG Donut charts, & recent activities
 │       ├── ClientsView.jsx   # Leads grid, filters, and client database modifiers
-│       ├── AnalysisView.jsx  # Gemini AI forecasting generator with fallbacks
+│       ├── AnalysisView.jsx  # AI forecasting generator with fallbacks
 │       └── SettingsView.jsx  # Operator profile parameters & passcode changes
 └── schema.sql           # Production MySQL relational model backup
 ```
@@ -76,9 +75,9 @@ npm install
 ```
 
 ### 3. Smart AI Configuration (Optional)
-To activate high-tier Gemini AI business forecasts, provide your Gemini API key in your system environment prior to running:
+To activate high-tier AI business forecasts, provide your API key in your system environment prior to running:
 ```bash
-export GEMINI_API_KEY="your-gemini-api-key"
+export YOUR_API_KEY="your-api-key"
 ```
 *(If omitted, Smart CRM automatically activates its localized offline analyzer!)*
 
