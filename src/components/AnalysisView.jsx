@@ -97,7 +97,7 @@ function getSectorPath(cx, cy, r, startAngle, endAngle) {
 export default function AnalysisView({ user, clients, token }) {
   const [hoveredStatus, setHoveredStatus] = useState(null);
   
-  // Gemini AI CRM Intelligence States
+  // Predictive AI CRM Intelligence States
   const [aiReport, setAiReport] = useState("");
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -391,13 +391,13 @@ export default function AnalysisView({ user, clients, token }) {
         </div>
       </div>
 
-      {/* Advanced Gemini AI Prediction / Analytics briefing panel */}
+      {/* Advanced AI Prediction / Analytics briefing panel */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
         className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl relative overflow-hidden"
-        id="gemini-ai-briefing-panel"
+        id="ai-briefing-panel"
       >
         <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 rounded-full blur-2xl pointer-events-none" />
         
@@ -408,7 +408,7 @@ export default function AnalysisView({ user, clients, token }) {
                 <Sparkles size={16} />
               </span>
               <h3 className="text-base font-bold text-white font-display">
-                Gemini Predictive CRM Intelligence
+                Predictive CRM Intelligence
               </h3>
             </div>
             <p className="text-xs text-slate-400 mt-1.5">
@@ -442,7 +442,7 @@ export default function AnalysisView({ user, clients, token }) {
               <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
               <div className="text-center space-y-1">
                 <p className="text-xs tracking-wider uppercase font-bold text-slate-350">Assembling pipeline statistics...</p>
-                <p className="text-[10px] text-slate-500">Retrieving intelligence models (Gemini-3.5-Flash)</p>
+                <p className="text-[10px] text-slate-500">Retrieving intelligence models (Predictive-AI-3.5)</p>
               </div>
             </div>
           ) : aiError ? (
@@ -465,7 +465,7 @@ export default function AnalysisView({ user, clients, token }) {
                 <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl flex items-center gap-2.5 text-[10px] text-blue-450 mb-4 select-none font-sans">
                   <AlertCircle size={14} className="text-blue-400 shrink-0" />
                   <span>
-                    <strong>Offline Intelligence Match:</strong> Displaying local stats summary. Configure <strong>GEMINI_API_KEY</strong> in <strong>Settings</strong> secrets to enable true AI-powered predictions!
+                    <strong>Offline Intelligence Match:</strong> Displaying local stats summary. Configure <strong>AI_API_KEY</strong> in <strong>Settings</strong> secrets to enable true AI-powered predictions!
                   </span>
                 </div>
               )}
@@ -481,7 +481,7 @@ export default function AnalysisView({ user, clients, token }) {
                 Pipeline Report Awaiting Calculation
               </h4>
               <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                Click the **Run Pipeline Intelligence** button above to compile standard offline distribution parameters or dynamic Gemini predictive observations.
+                Click the **Run Pipeline Intelligence** button above to compile standard offline distribution parameters or dynamic predictive observations.
               </p>
             </div>
           )}

@@ -481,7 +481,7 @@ app.delete("/api/clients/:id", authenticateToken, (req, res) => {
 });
 
 // ==========================================
-// AI CORE PIPELINE ANALYTICS WITH GEMINI
+// AI CORE PIPELINE ANALYTICS
 // ==========================================
 app.post("/api/analysis", authenticateToken, async (req, res) => {
   const user = req.user;
@@ -529,14 +529,14 @@ Your client database is currently empty. To generate a smart data analysis:
     .map(([source, count]) => `* **${source}**: ${count} lead${count > 1 ? "s" : ""}`)
     .join("\n");
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     // Graceful fallback with static highly tailored smart analytics when API key is missing
     res.json({
       missingKey: true,
       analysis: `### 📊 CRM Local Analysis Report (Offline Mode)
  
-We have compiled an instant fallback analysis using your local CRM dataset metrics. Set up a **GEMINI_API_KEY** in **Settings > Secrets** to activate deep AI-powered predictive forecasts!
+We have compiled an instant fallback analysis using your local CRM dataset metrics. Set up an **AI_API_KEY** in **Settings > Secrets** to activate deep AI-powered predictive forecasts!
 
 #### 📈 Sales Funnel Metrics
 * **Total Portfolio Value**: $${totalDealValue.toLocaleString()}
@@ -554,7 +554,7 @@ We have compiled an instant fallback analysis using your local CRM dataset metri
 #### 📣 Core Acquisition Channels
 ${sourceSummary || "* No lead sources detected."}
 
-*💡 Tip: Enable your Gemini API key in the platform to run smart AI forecasting with deeper recommendations!*`,
+*💡 Tip: Enable your AI API key in the platform to run smart AI forecasting with deeper recommendations!*`,
     });
     return;
   }
@@ -598,8 +598,8 @@ INSTRUCTIONS:
     const responseText = completion.text || "Failed to generate AI analysis. Please try again.";
     res.json({ analysis: responseText });
   } catch (err) {
-    console.error("Gemini API Error:", err);
-    res.status(500).json({ error: "Gemini API call failed: " + err.message });
+    console.error("AI API Error:", err);
+    res.status(500).json({ error: "AI API call failed: " + err.message });
   }
 });
 
