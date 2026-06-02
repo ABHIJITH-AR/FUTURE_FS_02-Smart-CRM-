@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Overriding default slate colors to map everything into a luxurious deep dark blue palette */
+  --color-slate-950: #04091a;
+  --color-slate-900: #071130;
+  --color-slate-850: #0b1842;
+  --color-slate-800: #102157;
+  --color-slate-750: #142966;
+  --color-slate-700: #19327d;
+  --color-slate-600: #294cb0;
+}
+
+/* Custom premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #04091a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0b1842;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}
+
+/* Custom animations for glass cards and gradients */
+@keyframes ambientGlow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: translate(20px, -30px) scale(1.1);
+    opacity: 0.25;
+  }
+}
+
+.animate-glow-slow {
+  animation: ambientGlow 12s infinite alternate ease-in-out;
+}
+
+.animate-glow-slower {
+  animation: ambientGlow 18s infinite alternate-reverse ease-in-out;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(7, 17, 48, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.glass-panel-active {
+  background: rgba(11, 24, 66, 0.85);
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.1);
+}
