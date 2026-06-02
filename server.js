@@ -529,7 +529,7 @@ Your client database is currently empty. To generate a smart data analysis:
     .map(([source, count]) => `* **${source}**: ${count} lead${count > 1 ? "s" : ""}`)
     .join("\n");
 
-  const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
+  const apiKey = process.env.AI_Api_Key || process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     // Graceful fallback with static highly tailored smart analytics when API key is missing
     res.json({
@@ -608,7 +608,14 @@ INSTRUCTIONS:
 // ==========================================
 
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
+  const { default: fs } = await import("fs");
+  const distPath = path.join(process.cwd(), "dist");
+  const hasDist = fs.existsSync(path.join(distPath, "index.html"));
+
+  if (process.env.NODE_ENV !== "production" || !hasDist) {
+    if (process.env.NODE_ENV === "production" && !hasDist) {
+      console.warn("WARNING: NODE_ENV is set to production but 'dist/index.html' was not found. Falling back to Vite dev middleware to prevent 404 errors.");
+    }
     // Inject Vite as development asset middleware
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
@@ -618,7 +625,6 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     // Serve production static built files
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
@@ -630,4 +636,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

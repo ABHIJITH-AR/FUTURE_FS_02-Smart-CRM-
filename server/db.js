@@ -2,7 +2,12 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-const DB_FILE = path.join(process.cwd(), "data.json");
+// Detect if running on Vercel or production serverless environments where root dir is read-only
+const IS_VERCEL = process.env.VERCEL || process.env.NOW_BUILDER || !process.env.AIS_DEV;
+let DB_FILE = path.join(process.cwd(), "data.json");
+if (IS_VERCEL) {
+  DB_FILE = path.join("/tmp", "data.json");
+}
 
 export function hashPassword(password) {
   return crypto.createHash("sha256").update(password).digest("hex");
@@ -19,6 +24,25 @@ function initializeDatabase() {
       }
     } catch (e) {
       console.error("Failed to parse database, creating a fresh one...", e);
+    }
+  }
+
+  // If we are on Vercel, we can try to copy/read the initial data.json from the build directory
+  const rootDbFile = path.join(process.cwd(), "data.json");
+  if (IS_VERCEL && fs.existsSync(rootDbFile)) {
+    try {
+      const data = fs.readFileSync(rootDbFile, "utf-8");
+      const parsed = JSON.parse(data);
+      if (parsed.users && parsed.clients && parsed.sessions) {
+        try {
+          fs.writeFileSync(DB_FILE, data, "utf-8");
+        } catch (errWrite) {
+          console.error("Failed to write copy to writable DB_FILE /tmp/data.json:", errWrite);
+        }
+        return parsed;
+      }
+    } catch (e) {
+      console.error("Failed to read root database:", e);
     }
   }
 
@@ -91,14 +115,22 @@ function initializeDatabase() {
     sessions: [],
   };
 
-  fs.writeFileSync(DB_FILE, JSON.stringify(defaultSchema, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(defaultSchema, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to write default template DB:", err);
+  }
   return defaultSchema;
 }
 
 let dbCache = initializeDatabase();
 
 export function saveDatabase() {
-  fs.writeFileSync(DB_FILE, JSON.stringify(dbCache, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(dbCache, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Warning: Database persistence failed (likely read-only serverless environment).", err);
+  }
 }
 
 export function getUsers() {
