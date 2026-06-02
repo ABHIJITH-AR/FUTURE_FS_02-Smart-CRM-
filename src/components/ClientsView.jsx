@@ -232,10 +232,10 @@ export default function ClientsView({
             <Sparkles className="h-8 w-8 animate-pulse text-cyan-455" />
           </div>
           <h3 className="font-display text-xl md:text-2xl font-bold text-white tracking-tight drop-shadow-md">
-            നിങ്ങളുടെ Lead Ledger ശൂന്യമാണ്!
+            Your Lead Ledger is Empty!
           </h3>
           <p className="text-slate-400 text-sm max-w-lg mt-3 font-medium leading-relaxed">
-            ഡാഷ്‌ബോർഡ് സ്റ്റാറ്റുകൾ, ഗ്രാഫുകൾ, ഫിൽട്ടറുകൾ എന്നിവ കണ്ട് പരിശോധിക്കുന്നതിനായി പുതിയ ക്ലയന്റ് കോൺടാക്റ്റുകളെ ആഡ് ചെയ്യുക!
+            Add new client contacts to view dashboard statistics, interactive graphs, and apply search filters!
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
