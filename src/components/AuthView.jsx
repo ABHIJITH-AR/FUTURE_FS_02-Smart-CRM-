@@ -51,7 +51,14 @@ export default function AuthView({ onAuthSuccess, setErrorAlert, setSuccessAlert
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        const text = await response.text();
+        data = text.trim() ? JSON.parse(text) : {};
+      } catch (jsonErr) {
+        console.warn("Auth JSON parsing failed", jsonErr);
+        data = { error: `Server answered with status code ${response.status}.` };
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Something went wrong. Please check your credentials.");

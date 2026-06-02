@@ -32,6 +32,16 @@ export default function App() {
     }, 4000);
   };
 
+  const safeParseJson = async (response) => {
+    try {
+      const text = await response.text();
+      return text.trim() ? JSON.parse(text) : {};
+    } catch (err) {
+      console.warn("CRM JSON parsing failed, returning empty error fallback.", err);
+      return { error: `Server answered with status code ${response.status}.` };
+    }
+  };
+
   // 1. Authenticate cached token and boot state setup
   useEffect(() => {
     const initCRM = async () => {
@@ -46,7 +56,7 @@ export default function App() {
         });
 
         if (response.ok) {
-          const userData = await response.json();
+          const userData = await safeParseJson(response);
           setUser(userData);
           // Load CRM Client Ledger
           await fetchClients(token);
@@ -74,8 +84,8 @@ export default function App() {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (response.ok) {
-        const clientsData = await response.json();
-        setClients(clientsData);
+        const clientsData = await safeParseJson(response);
+        setClients(Array.isArray(clientsData) ? clientsData : []);
       }
     } catch (err) {
       console.error("Failed to sync clients ledger", err);
@@ -128,7 +138,7 @@ export default function App() {
         body: JSON.stringify(clientData),
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
         setClients((prev) => [...prev, data.client]);
         showToast(`Lead for ${clientData.fullName} acquired successfully!`, "success");
@@ -156,7 +166,7 @@ export default function App() {
         body: JSON.stringify(clientData),
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
         setClients((prev) =>
           prev.map((c) => (c.id === clientId ? data.client : c))
@@ -182,7 +192,7 @@ export default function App() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
         setClients((prev) => prev.filter((c) => c.id !== clientId));
         showToast("Client record permanently discarded.", "success");
@@ -206,9 +216,9 @@ export default function App() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
-        setClients((prev) => [...prev, ...data.clients]);
+        setClients((prev) => [...prev, ...(data.clients || [])]);
         showToast("Seeded 6 professional sample leads successfully!", "success");
         return true;
       } else {
@@ -234,7 +244,7 @@ export default function App() {
         body: JSON.stringify({ fullName, email }),
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
         setUser((prev) => (prev ? { ...prev, fullName, email } : null));
         return true;
@@ -261,7 +271,7 @@ export default function App() {
         body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass }),
       });
 
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok) {
         return true;
       } else {

@@ -1,6 +1,7 @@
 # Smart CRM - Client Lead Management System
 
-Smart CRM is a secure, full-stack Customer Relationship Management platform. It features interactive SVG analytics, advanced lead pipeline management, and predictive forecasting.
+Smart CRM is a high-performance, full-stack, secure Customer Relationship Management (CRM) platform built on raw, pure JavaScript. It offers an elegant dark theme visual landscape, interactive SVG analytics, advanced lead pipeline management (CRUD), deep search filters, operator settings correction, and premium AI-powered predictive forecasting.
+
 ---
 
 ## 🌟 Key Features & Capabilities
@@ -28,7 +29,7 @@ Smart CRM is a secure, full-stack Customer Relationship Management platform. It 
 
 ## 🏗️ Technical Architecture
 
-- **Frontend**: React 19, JavaScript (JSX), Vite Client-Side Bundler, Tailwind CSS , Motion, Lucide Icons
+- **Frontend**: React 19, JavaScript (JSX), Vite Client-Side Bundler, Tailwind CSS 4, Motion, Lucide Icons
 - **Backend / Routing**: Node.js, Express.js server, direct CommonJS compilation bundle with `esbuild`
 - **Database Indexing**: Secure, server-side concurrent JSON document engine (`data.json`) with automated seeding structures
 
@@ -39,7 +40,7 @@ Smart CRM is a secure, full-stack Customer Relationship Management platform. It 
 ```bash
 ├── package.json         # Full-stack dependencies and build/dev runner scripts
 ├── vite.config.js       # Vite configuration serving SPA assets with path aliases
-├── server.js            # Node Express server coordinating API endpoints & integrations
+├── server.js            # Node Express server coordinating API endpoints & AI integrations
 ├── data.json            # Active database JSON storage document
 ├── server
 │   └── db.js            # Database interaction methods (users, sessions, clients CRUD)
@@ -77,7 +78,7 @@ npm install
 ### 3. Smart AI Configuration (Optional)
 To activate high-tier AI business forecasts, provide your API key in your system environment prior to running:
 ```bash
-export YOUR_API_KEY="your-api-key"
+export AI_API_KEY="your-api-key"
 ```
 *(If omitted, Smart CRM automatically activates its localized offline analyzer!)*
 

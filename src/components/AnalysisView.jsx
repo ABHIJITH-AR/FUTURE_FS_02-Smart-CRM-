@@ -8,9 +8,75 @@ import {
   Activity,
   CheckCircle,
   Clock,
-  UserX
+  UserX,
+  Sparkles,
+  Loader2,
+  FileText
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+
+// Helper function to render inlined bold parts in custom Markdown parser
+function renderInlinedBold(text) {
+  const parts = text.split(/\*\*([^*]+)\*\*/g);
+  return parts.map((part, idx) => {
+    if (idx % 2 === 1) {
+      return (
+        <strong key={idx} className="font-extrabold text-blue-300 font-mono text-[11px] bg-slate-950/60 px-1 py-0.5 rounded border border-slate-800 mx-0.5 whitespace-nowrap">
+          {part}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
+// Robust, elegant visual parser for markdown sections
+function formatMarkdown(text) {
+  if (!text) return null;
+  return text.split("\n").map((line, idx) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("###")) {
+      return (
+        <h4 key={idx} className="text-xs md:text-sm font-bold text-cyan-400 uppercase tracking-widest font-mono mt-5 mb-2.5 flex items-center gap-2 border-b border-slate-800/80 pb-1.5">
+          <Sparkles size={14} className="text-cyan-400 shrink-0" />
+          <span>{trimmed.replace(/^###\s*/, "")}</span>
+        </h4>
+      );
+    }
+    if (trimmed.startsWith("####")) {
+      return (
+        <h5 key={idx} className="text-[11px] font-bold text-violet-400 uppercase mt-4 mb-2 font-mono tracking-wider flex items-center gap-1.5">
+          <FileText size={12} className="text-violet-400 shrink-0" />
+          <span>{trimmed.replace(/^####\s*/, "")}</span>
+        </h5>
+      );
+    }
+    if (trimmed.startsWith("##")) {
+      return (
+        <h3 key={idx} className="text-sm md:text-base font-bold text-white mt-6 mb-3 border-b border-slate-800 pb-2 flex items-center gap-2">
+          <span>{trimmed.replace(/^##\s*/, "")}</span>
+        </h3>
+      );
+    }
+    if (trimmed.startsWith("*") || trimmed.startsWith("-")) {
+      const content = trimmed.replace(/^[\*\-]\s*/, "");
+      return (
+        <li key={idx} className="text-xs text-slate-300 ml-4 list-disc leading-relaxed mt-1 flex items-start gap-1">
+          <span className="text-cyan-500 shrink-0 mt-1 select-none font-sans font-bold text-[9px]">&bull;</span>
+          <span className="flex-1">{renderInlinedBold(content)}</span>
+        </li>
+      );
+    }
+    if (trimmed === "") {
+      return <div key={idx} className="h-2" />;
+    }
+    return (
+      <p key={idx} className="text-xs text-slate-300 leading-relaxed mt-1.5 font-sans">
+        {renderInlinedBold(trimmed)}
+      </p>
+    );
+  });
+}
 
 // SVG Arc path generator for Pie Chart sectors
 function getSectorPath(cx, cy, r, startAngle, endAngle) {
@@ -28,8 +94,48 @@ function getSectorPath(cx, cy, r, startAngle, endAngle) {
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
 }
 
-export default function AnalysisView({ user, clients }) {
+export default function AnalysisView({ user, clients, token }) {
   const [hoveredStatus, setHoveredStatus] = useState(null);
+  
+  // Gemini AI CRM Intelligence States
+  const [aiReport, setAiReport] = useState("");
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [isMissingKey, setIsMissingKey] = useState(false);
+
+  const generateAiAnalysis = async () => {
+    setLoadingAi(true);
+    setAiError("");
+    try {
+      const response = await fetch("/api/analysis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      let data = {};
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (jsonErr) {
+        console.warn("Analysis response decoding error", jsonErr);
+        data = { error: `Database responded with error status ${response.status}.` };
+      }
+
+      if (response.ok) {
+        setAiReport(data.analysis || "");
+        setIsMissingKey(!!data.missingKey);
+      } else {
+        setAiError(data.error || "Failed to trigger analysis generator. Try again.");
+      }
+    } catch (err) {
+      setAiError("Network timed out or is unaccessible. Run with local statistics.");
+    } finally {
+      setLoadingAi(false);
+    }
+  };
 
   // Compute stats for visualization
   const totalClients = clients.length;
@@ -273,7 +379,7 @@ export default function AnalysisView({ user, clients }) {
                   <span className="p-1 px-1.5 rounded-md bg-slate-500/15 text-slate-400 font-bold font-mono">
                     Inactive
                   </span>
-                  <span className="font-medium font-mono">Cold prospects</span>
+                  <span className="font-medium font-mono font-sans">Cold prospects</span>
                 </div>
                 <span className="font-mono text-slate-100 font-bold">{inactiveClients} accounts</span>
               </div>
@@ -284,6 +390,103 @@ export default function AnalysisView({ user, clients }) {
           </div>
         </div>
       </div>
+
+      {/* Advanced Gemini AI Prediction / Analytics briefing panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl relative overflow-hidden"
+        id="gemini-ai-briefing-panel"
+      >
+        <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-gradient-to-br from-cyan-500/10 to-violet-500/10 text-cyan-400 border border-cyan-500/25">
+                <Sparkles size={16} />
+              </span>
+              <h3 className="text-base font-bold text-white font-display">
+                Gemini Predictive CRM Intelligence
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              Generate business development briefs, pipeline audits, priority segment actions, and growth recommendations.
+            </p>
+          </div>
+          <button
+            onClick={generateAiAnalysis}
+            disabled={loadingAi}
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 text-white font-semibold text-xs px-4.5 py-2.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(59,130,246,0.25)] hover:shadow-[0_4px_20px_rgba(139,92,246,0.35)] cursor-pointer disabled:opacity-50 shrink-0 self-start md:self-center"
+            id="btn-run-ai-analysis"
+          >
+            {loadingAi ? (
+              <>
+                <Loader2 size={14} className="animate-spin text-white" />
+                <span>Calibrating Forecast...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles size={14} className="text-white" />
+                <span>Run Pipeline Intelligence</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Dynamic Display Area */}
+        <div className="mt-5 min-h-[140px] flex flex-col justify-center">
+          {loadingAi ? (
+            <div className="flex flex-col items-center justify-center py-10 text-slate-400 space-y-3 font-mono">
+              <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+              <div className="text-center space-y-1">
+                <p className="text-xs tracking-wider uppercase font-bold text-slate-350">Assembling pipeline statistics...</p>
+                <p className="text-[10px] text-slate-500">Retrieving intelligence models (Gemini-3.5-Flash)</p>
+              </div>
+            </div>
+          ) : aiError ? (
+            <div className="bg-red-500/10 border border-red-500/20 p-5 rounded-xl flex items-start gap-3.5 text-xs text-red-400 max-w-2xl mx-auto my-4 w-full">
+              <AlertCircle size={18} className="shrink-0 text-red-400 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold">Execution Interrupted</p>
+                <p className="text-slate-300 leading-relaxed font-sans">{aiError}</p>
+                <button 
+                  onClick={generateAiAnalysis}
+                  className="mt-2 text-red-300 hover:text-white font-bold underline cursor-pointer"
+                >
+                  Retry request
+                </button>
+              </div>
+            </div>
+          ) : aiReport ? (
+            <div className="space-y-4 max-w-none text-slate-200">
+              {isMissingKey && (
+                <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl flex items-center gap-2.5 text-[10px] text-blue-450 mb-4 select-none font-sans">
+                  <AlertCircle size={14} className="text-blue-400 shrink-0" />
+                  <span>
+                    <strong>Offline Intelligence Match:</strong> Displaying local stats summary. Configure <strong>GEMINI_API_KEY</strong> in <strong>Settings</strong> secrets to enable true AI-powered predictions!
+                  </span>
+                </div>
+              )}
+              
+              <div className="bg-slate-950/40 border border-slate-800/80 p-5 rounded-2xl leading-relaxed pr-6 shadow-inner font-sans">
+                {formatMarkdown(aiReport)}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500 max-w-md mx-auto">
+              <Sparkles size={28} className="text-cyan-500/30 mb-3 animate-pulse" />
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+                Pipeline Report Awaiting Calculation
+              </h4>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                Click the **Run Pipeline Intelligence** button above to compile standard offline distribution parameters or dynamic Gemini predictive observations.
+              </p>
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
