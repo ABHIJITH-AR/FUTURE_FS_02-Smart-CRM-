@@ -97,6 +97,83 @@ app.post("/api/auth/register", (req, res) => {
 
   addUser(newUser);
 
+  // Auto-seed 5 premium sample client records for newly registered user so they don't start empty
+  const defaultSampleLeads = [
+    {
+      fullName: "Sarah Connor",
+      email: "sarah.connor@cyberdyne.com",
+      phone: "+1 (555) 019-2834",
+      companyName: "Cyberdyne Systems",
+      status: "Active",
+      priority: "High",
+      dealValue: 75000,
+      leadSource: "Referral",
+      notes: "Interested in full digital systems upgrade and cloud transition."
+    },
+    {
+      fullName: "Tony Stark",
+      email: "tony@starkindustries.com",
+      phone: "+1 (555) 382-9102",
+      companyName: "Stark Industries",
+      status: "Active",
+      priority: "High",
+      dealValue: 240000,
+      leadSource: "Partner Referral",
+      notes: "Evaluating dashboard enterprise subscription model."
+    },
+    {
+      fullName: "Bruce Wayne",
+      email: "bruce@wayneenterprises.com",
+      phone: "+1 (555) 728-1192",
+      companyName: "Wayne Enterprises",
+      status: "Pending",
+      priority: "Medium",
+      dealValue: 125000,
+      leadSource: "Direct Web",
+      notes: "Evaluating system security metrics and active response indicators."
+    },
+    {
+      fullName: "Peter Parker",
+      email: "peter.parker@dailybugle.com",
+      phone: "+1 (555) 918-2039",
+      companyName: "Daily Bugle",
+      status: "Inactive",
+      priority: "Low",
+      dealValue: 8500,
+      leadSource: "Conference",
+      notes: "Needs low-tier pricing plan. Scheduled callback next quarter."
+    },
+    {
+      fullName: "Diana Prince",
+      email: "diana.prince@themysis.org",
+      phone: "+1 (555) 867-5309",
+      companyName: "Themysis Exhibits",
+      status: "Pending",
+      priority: "Medium",
+      dealValue: 48500,
+      leadSource: "Website",
+      notes: "Requested a prototype layout and contract by end of the week."
+    }
+  ];
+
+  defaultSampleLeads.forEach((lead, index) => {
+    addClient({
+      id: "c-seed-" + index + "-" + crypto.randomBytes(4).toString("hex"),
+      userId: userId,
+      fullName: lead.fullName,
+      email: lead.email,
+      phone: lead.phone,
+      companyName: lead.companyName,
+      status: lead.status,
+      createdAt: new Date(Date.now() - (index + 1) * 3600000 * 24).toISOString(),
+      priority: lead.priority,
+      dealValue: lead.dealValue,
+      leadSource: lead.leadSource,
+      notes: lead.notes,
+      photo: ""
+    });
+  });
+
   // Generate Session
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 3600000 * 24).toISOString(); // 24 hours expiry

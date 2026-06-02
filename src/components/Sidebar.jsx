@@ -91,7 +91,7 @@ export default function Sidebar({
               <p className="text-sm font-semibold text-slate-200 truncate leading-tight">
                 {user.fullName}
               </p>
-              <p className="text-xs text-slate-505 truncate mt-0.5">
+              <p className="text-xs text-slate-400 truncate mt-0.5">
                 {user.email}
               </p>
             </div>

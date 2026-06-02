@@ -2,6 +2,37 @@ import { useState } from "react";
 import { Users, UserCheck, Clock, ShieldAlert, Award, Plus, ArrowRight, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+const GRADIENTS = [
+  "from-cyan-500 to-blue-600 text-cyan-50",
+  "from-purple-500 to-indigo-600 text-purple-50",
+  "from-pink-500 to-rose-600 text-pink-50",
+  "from-amber-500 to-orange-600 text-amber-50",
+  "from-emerald-500 to-teal-600 text-emerald-50",
+  "from-violet-500 to-fuchsia-600 text-violet-50"
+];
+
+const PRESET_AVATARS = [
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80",
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"
+];
+
+function getAvatarFallback(fullName) {
+  const name = fullName || "?";
+  const index = Math.abs(name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)) % GRADIENTS.length;
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase() || "?";
+  return { initials, gradient: GRADIENTS[index] };
+}
+
 // SVG Arc path generator for Pie Chart sectors
 function getSectorPath(cx, cy, r, startAngle, endAngle) {
   if (endAngle - startAngle >= 360) {
@@ -79,9 +110,9 @@ export default function DashboardView({
   ];
 
   const chartSegments = [
-    { label: "Active", count: activeClients, color: "#10b981", shadow: "rgba(16,185,129,0.35)", textColor: "text-emerald-400" },
-    { label: "Pending", count: pendingClients, color: "#f59e0b", shadow: "rgba(245,158,11,0.35)", textColor: "text-amber-400" },
-    { label: "Inactive", count: inactiveClients, color: "#94a3b8", shadow: "rgba(148,163,184,0.35)", textColor: "text-slate-400" },
+    { label: "Active", count: activeClients, color: "url(#gradient-Active)", solidColor: "#06b6d4", shadow: "rgba(6,182,212,0.5)", textColor: "text-cyan-400" },
+    { label: "Pending", count: pendingClients, color: "url(#gradient-Pending)", solidColor: "#c084fc", shadow: "rgba(168,85,247,0.5)", textColor: "text-purple-400" },
+    { label: "Inactive", count: inactiveClients, color: "url(#gradient-Inactive)", solidColor: "#f43f5e", shadow: "rgba(244,63,94,0.5)", textColor: "text-rose-400" },
   ].filter(item => item.count > 0);
 
   let tempAngle = -90;
@@ -218,12 +249,26 @@ export default function DashboardView({
             </span>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-around gap-8 py-6">
+           <div className="flex flex-col md:flex-row items-center justify-around gap-8 py-6">
             {/* Interactive Pie Chart SVG */}
             <div className="relative h-56 w-56 flex items-center justify-center select-none" id="dashboard-pie-svg-wrapper">
               {totalClients > 0 ? (
                 <>
                   <svg viewBox="0 0 200 200" className="w-full h-full transform transition-all duration-300">
+                    <defs>
+                      <linearGradient id="gradient-Active" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#06b6d4" />
+                        <stop offset="100%" stopColor="#0891b2" />
+                      </linearGradient>
+                      <linearGradient id="gradient-Pending" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#c084fc" />
+                        <stop offset="100%" stopColor="#7c3aed" />
+                      </linearGradient>
+                      <linearGradient id="gradient-Inactive" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fb7185" />
+                        <stop offset="100%" stopColor="#f43f5e" />
+                      </linearGradient>
+                    </defs>
                     {sectors.map((p) => {
                       const isHovered = hoveredStatus === p.label;
                       return (
@@ -245,8 +290,10 @@ export default function DashboardView({
                         />
                       );
                     })}
-                    {/* Donut inner core mask */}
+                    {/* Donut inner core mask with beautiful rings */}
                     <circle cx="100" cy="100" r="45" fill="#071130" />
+                    <circle cx="100" cy="100" r="45" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" fill="none" />
+                    <circle cx="100" cy="100" r="85" stroke="rgba(255,255,255,0.04)" strokeWidth="1" fill="none" />
                   </svg>
                   
                   {/* Center overlay indicator */}
@@ -274,9 +321,9 @@ export default function DashboardView({
             {/* Custom Interactive Legend Keys */}
             <div className="space-y-4 shrink-0 font-sans w-full md:w-auto">
               {[
-                { label: "Active", count: activeClients, color: "bg-emerald-500" },
-                { label: "Pending", count: pendingClients, color: "bg-amber-500" },
-                { label: "Inactive", count: inactiveClients, color: "bg-slate-400" }
+                { label: "Active", count: activeClients, color: "bg-cyan-500" },
+                { label: "Pending", count: pendingClients, color: "bg-purple-500" },
+                { label: "Inactive", count: inactiveClients, color: "bg-rose-500" }
               ].map((item) => {
                 const isHovered = hoveredStatus === item.label;
                 const ratio = totalClients > 0 ? Math.round((item.count / totalClients) * 100) : 0;
@@ -345,18 +392,14 @@ export default function DashboardView({
                     className="flex items-center justify-between p-3 rounded-xl border border-slate-800/60 bg-slate-950/40 hover:bg-slate-950/80 transition-all"
                   >
                     <div className="min-w-0 flex-1 flex items-center gap-3 pr-3">
-                      {cli.photo ? (
-                        <img
-                          src={cli.photo}
-                          referrerPolicy="no-referrer"
-                          className="h-8 w-8 rounded-full object-cover border border-slate-800/80 flex-shrink-0"
-                          alt={cli.fullName}
-                        />
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-slate-800 text-slate-350 border border-slate-700 flex items-center justify-center font-bold text-[10px] font-mono flex-shrink-0 select-none">
-                          {cli.fullName ? cli.fullName.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase() : "?"}
-                        </div>
-                      )}
+                      {(() => {
+                        const { initials, gradient } = getAvatarFallback(cli.fullName);
+                        return (
+                          <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${gradient} border border-slate-800/80 flex-shrink-0 flex items-center justify-center font-bold text-[10px] tracking-wide select-none uppercase font-sans`}>
+                            {initials}
+                          </div>
+                        );
+                      })()}
                       
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-100 truncate">{cli.fullName}</p>
@@ -381,8 +424,8 @@ export default function DashboardView({
           </div>
 
           <div className="mt-5 border-t border-slate-800/60 pt-4 text-center">
-            <p className="text-[11px] text-slate-505">
-              Smart CRM utilizes an elite local JSON index structure.
+            <p className="text-[11px] text-slate-500 font-mono tracking-wide uppercase opacity-75">
+              High-Performance Indexed Document Storage Active
             </p>
           </div>
         </motion.div>

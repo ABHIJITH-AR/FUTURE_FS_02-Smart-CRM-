@@ -11,7 +11,8 @@ import {
   UserX,
   Sparkles,
   Loader2,
-  FileText
+  FileText,
+  ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -94,7 +95,7 @@ function getSectorPath(cx, cy, r, startAngle, endAngle) {
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
 }
 
-export default function AnalysisView({ user, clients, token }) {
+export default function AnalysisView({ user, clients, token, setActiveTab }) {
   const [hoveredStatus, setHoveredStatus] = useState(null);
   
   // Predictive AI CRM Intelligence States
@@ -152,9 +153,9 @@ export default function AnalysisView({ user, clients, token }) {
 
   // Pie chart segments logic
   const items = [
-    { label: "Active", count: activeClients, color: "#10b981", shadow: "rgba(16,185,129,0.3)", tailwindColor: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { label: "Pending", count: pendingClients, color: "#f59e0b", shadow: "rgba(245,158,11,0.3)", tailwindColor: "text-amber-400", bg: "bg-amber-500/10" },
-    { label: "Inactive", count: inactiveClients, color: "#64748b", shadow: "rgba(100,116,139,0.3)", tailwindColor: "text-slate-400", bg: "bg-slate-500/10" },
+    { label: "Active", count: activeClients, color: "url(#analysis-grad-Active)", solidColor: "#06b6d4", shadow: "rgba(6,182,212,0.5)", tailwindColor: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Pending", count: pendingClients, color: "url(#analysis-grad-Pending)", solidColor: "#c084fc", shadow: "rgba(168,85,247,0.5)", tailwindColor: "text-purple-400", bg: "bg-purple-500/10" },
+    { label: "Inactive", count: inactiveClients, color: "url(#analysis-grad-Inactive)", solidColor: "#f43f5e", shadow: "rgba(244,63,94,0.5)", tailwindColor: "text-rose-400", bg: "bg-rose-500/10" },
   ].filter(item => item.count > 0);
 
   let currentAngle = -90; // Top of the circle (12 o'clock)
@@ -178,6 +179,15 @@ export default function AnalysisView({ user, clients, token }) {
 
   return (
     <div className="space-y-6" id="analysis-view">
+      {setActiveTab && (
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className="group inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-all duration-200 cursor-pointer"
+        >
+          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+          <span>Back to Dashboard</span>
+        </button>
+      )}
       {/* Header Panel */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -215,6 +225,20 @@ export default function AnalysisView({ user, clients, token }) {
               {totalClients > 0 ? (
                 <>
                   <svg viewBox="0 0 300 300" className="w-full h-full transform transition-all duration-355">
+                    <defs>
+                      <linearGradient id="analysis-grad-Active" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#06b6d4" />
+                        <stop offset="100%" stopColor="#0891b2" />
+                      </linearGradient>
+                      <linearGradient id="analysis-grad-Pending" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#c084fc" />
+                        <stop offset="100%" stopColor="#7c3aed" />
+                      </linearGradient>
+                      <linearGradient id="analysis-grad-Inactive" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fb7185" />
+                        <stop offset="100%" stopColor="#f43f5e" />
+                      </linearGradient>
+                    </defs>
                     {paths.map((p) => {
                       const isHovered = hoveredStatus === p.label;
                       return (
@@ -236,8 +260,10 @@ export default function AnalysisView({ user, clients, token }) {
                         />
                       );
                     })}
-                    {/* Inner hole mask to convert to high-end donut/pie hybrid */}
+                    {/* Inner hole mask to convert to high-end donut/pie hybrid with concentric details */}
                     <circle cx="150" cy="150" r="55" fill="#04091a" />
+                    <circle cx="150" cy="150" r="55" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" fill="none" />
+                    <circle cx="150" cy="150" r="120" stroke="rgba(255,255,255,0.04)" strokeWidth="1" fill="none" />
                   </svg>
                   
                   {/* Center percentage output overlay */}
@@ -269,7 +295,7 @@ export default function AnalysisView({ user, clients, token }) {
                 onMouseEnter={() => setHoveredStatus("Active")}
                 onMouseLeave={() => setHoveredStatus(null)}
               >
-                <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 mr-1.5" />
+                <span className="inline-block h-2 w-2 rounded-full bg-cyan-500 mr-1.5" />
                 <span className="text-[10px] text-slate-355 font-semibold">Active ({activeClients})</span>
               </div>
               <div 
@@ -277,7 +303,7 @@ export default function AnalysisView({ user, clients, token }) {
                 onMouseEnter={() => setHoveredStatus("Pending")}
                 onMouseLeave={() => setHoveredStatus(null)}
               >
-                <span className="inline-block h-2 w-2 rounded-full bg-amber-500 mr-1.5" />
+                <span className="inline-block h-2 w-2 rounded-full bg-purple-500 mr-1.5" />
                 <span className="text-[10px] text-slate-355 font-semibold">Pending ({pendingClients})</span>
               </div>
               <div 
@@ -285,7 +311,7 @@ export default function AnalysisView({ user, clients, token }) {
                 onMouseEnter={() => setHoveredStatus("Inactive")}
                 onMouseLeave={() => setHoveredStatus(null)}
               >
-                <span className="inline-block h-2 w-2 rounded-full bg-slate-500 mr-1.5" />
+                <span className="inline-block h-2 w-2 rounded-full bg-rose-500 mr-1.5" />
                 <span className="text-[10px] text-slate-355 font-semibold">Inactive ({inactiveClients})</span>
               </div>
             </div>

@@ -1,15 +1,28 @@
 import React, { useState } from "react";
-import { Search, Filter, Plus, Edit2, Trash2, X, AlertCircle, Sparkles } from "lucide-react";
+import { Search, Filter, Plus, Edit2, Trash2, X, AlertCircle, Sparkles, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-const PRESET_AVATARS = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80",
-  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80",
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"
+const GRADIENTS = [
+  "from-cyan-500 to-blue-600 text-cyan-50",
+  "from-purple-500 to-indigo-600 text-purple-50",
+  "from-pink-500 to-rose-600 text-pink-50",
+  "from-amber-500 to-orange-600 text-amber-50",
+  "from-emerald-500 to-teal-600 text-emerald-50",
+  "from-violet-500 to-fuchsia-600 text-violet-50"
 ];
+
+function getAvatarFallback(fullName) {
+  const name = fullName || "?";
+  const index = Math.abs(name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)) % GRADIENTS.length;
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase() || "?";
+  return { initials, gradient: GRADIENTS[index] };
+}
 
 export default function ClientsView({
   clients,
@@ -19,6 +32,7 @@ export default function ClientsView({
   isAddModalOpen,
   setIsAddModalOpen,
   onSeedClients,
+  setActiveTab,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -202,14 +216,23 @@ export default function ClientsView({
 
   return (
     <div className="space-y-6" id="clients-view">
+      {setActiveTab && (
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className="group inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-all duration-200 cursor-pointer"
+        >
+          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+          <span>Back to Dashboard</span>
+        </button>
+      )}
       {/* Header and Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4" id="ledger-header">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-sky-400 via-blue-400 to-violet-400 bg-clip-text text-transparent">
-            Smart CRM
+          <h2 className="font-display font-extrabold text-2xl md:text-3xl tracking-tight bg-gradient-to-r from-cyan-400 via-purple-400 to-rose-450 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+            Client Lead Management
           </h2>
           <p className="text-xs text-slate-400 mt-1 font-medium">
-            Search, filter, edit, and keep track of all client pipeline status changes.
+            Acquire, track, search, filter, and modify system accounts dynamically.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -244,6 +267,14 @@ export default function ClientsView({
             >
               <Plus size={16} />
               <span>Add Custom Lead</span>
+            </button>
+            <button
+              onClick={handleSeedAction}
+              disabled={isSeeding}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700/60 font-semibold text-sm px-6 py-3 rounded-xl transition-all cursor-pointer shadow-md disabled:opacity-50"
+            >
+              <Sparkles size={16} className={isSeeding ? "animate-spin text-cyan-400" : "text-cyan-400"} />
+              <span>{isSeeding ? "Seeding..." : "Create 5 Sample Clients"}</span>
             </button>
           </div>
         </div>
@@ -307,18 +338,14 @@ export default function ClientsView({
                         <td className="px-6 py-4.5">
                           <div className="flex items-center gap-3">
                             {/* Lead Avatar */}
-                            {client.photo ? (
-                              <img
-                                src={client.photo}
-                                referrerPolicy="no-referrer"
-                                className="h-10 w-10 rounded-full object-cover border-2 border-slate-800 shadow-md flex-shrink-0"
-                                alt={client.fullName}
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center font-bold text-xs font-mono flex-shrink-0 select-none">
-                                {client.fullName ? client.fullName.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase() : "?"}
-                              </div>
-                            )}
+                            {(() => {
+                              const { initials, gradient } = getAvatarFallback(client.fullName);
+                              return (
+                                <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${gradient} border-2 border-slate-800 shadow-md flex-shrink-0 flex items-center justify-center font-bold text-sm tracking-wide select-none uppercase font-sans`}>
+                                  {initials}
+                                </div>
+                              );
+                            })()}
 
                             <div>
                               <div className="font-semibold text-white flex items-center gap-2 flex-wrap">
@@ -439,91 +466,6 @@ export default function ClientsView({
                     <span>{validationError}</span>
                   </div>
                 )}
-
-                {/* Avatar Picker Zone */}
-                <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80 mb-3 space-y-3">
-                  <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Client Lead Photo Option
-                  </span>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="relative group flex-shrink-0">
-                      {photo ? (
-                        <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg">
-                          <img
-                            src={photo}
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover"
-                            alt="Avatar preview"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setPhoto("")}
-                            className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 text-[10px] font-bold transition-opacity"
-                          >
-                            Clear
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="h-14 w-14 rounded-full bg-slate-800 border border-slate-700 border-dashed flex items-center justify-center text-slate-500 font-mono text-xs font-bold leading-none select-none">
-                          {fullName ? fullName.split(" ").slice(0, 2).map(n => n?.[0] || "").join("").toUpperCase() : "Photo"}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <label className="bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1.5">
-                          <span>Upload picture</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.size > 2 * 1024 * 1024) {
-                                  alert("Please upload an image smaller than 2MB.");
-                                  return;
-                                }
-                                const reader = new FileReader();
-                                reader.onload = () => {
-                                  setPhoto(reader.result);
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-normal">
-                        Supports standard imagery smaller than 2MB, or click a quick portrait model:
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Preset Avatars Shortcuts */}
-                  <div className="flex items-center gap-2 overflow-x-auto py-1 justify-start">
-                    {PRESET_AVATARS.map((avatarUrl, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setPhoto(avatarUrl)}
-                        className={`h-9 w-9 rounded-full overflow-hidden border-2 transition-all hover:scale-105 flex-shrink-0 cursor-pointer ${
-                          photo === avatarUrl ? "border-cyan-400 scale-110 shadow-lg shadow-cyan-400/25" : "border-transparent opacity-75 hover:opacity-100"
-                        }`}
-                        title={`Preset Avatar ${idx + 1}`}
-                      >
-                        <img
-                          src={avatarUrl}
-                          referrerPolicy="no-referrer"
-                          className="h-full w-full object-cover"
-                          alt={`preset-${idx}`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -691,7 +633,7 @@ export default function ClientsView({
                     disabled={isSubmitting}
                     className="flex-1 bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 text-white rounded-xl font-semibold text-sm transition-all shadow-[0_4px_15px_rgba(59,130,246,0.3)] cursor-pointer py-2.5"
                   >
-                    {isSubmitting ? "Creating..." : "Create Prospect"}
+                    {isSubmitting ? "Creating..." : "Create Now"}
                   </button>
                 </div>
               </form>
@@ -729,91 +671,6 @@ export default function ClientsView({
                     <span>{validationError}</span>
                   </div>
                 )}
-
-                {/* Avatar Picker Zone */}
-                <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80 mb-3 space-y-3">
-                  <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Client Lead Photo Option
-                  </span>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="relative group flex-shrink-0">
-                      {photo ? (
-                        <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg">
-                          <img
-                            src={photo}
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover"
-                            alt="Avatar preview"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setPhoto("")}
-                            className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 text-[10px] font-bold transition-opacity"
-                          >
-                            Clear
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="h-14 w-14 rounded-full bg-slate-800 border border-slate-700 border-dashed flex items-center justify-center text-slate-500 font-mono text-xs font-bold leading-none select-none">
-                          {fullName ? fullName.split(" ").slice(0, 2).map(n => n?.[0] || "").join("").toUpperCase() : "Photo"}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <label className="bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1.5">
-                          <span>Upload picture</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.size > 2 * 1024 * 1024) {
-                                  alert("Please upload an image smaller than 2MB.");
-                                  return;
-                                }
-                                const reader = new FileReader();
-                                reader.onload = () => {
-                                  setPhoto(reader.result);
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-normal">
-                        Supports standard imagery smaller than 2MB, or click a quick portrait model:
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Preset Avatars Shortcuts */}
-                  <div className="flex items-center gap-2 overflow-x-auto py-1 justify-start">
-                    {PRESET_AVATARS.map((avatarUrl, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setPhoto(avatarUrl)}
-                        className={`h-9 w-9 rounded-full overflow-hidden border-2 transition-all hover:scale-105 flex-shrink-0 cursor-pointer ${
-                          photo === avatarUrl ? "border-cyan-400 scale-110 shadow-lg shadow-cyan-400/25" : "border-transparent opacity-75 hover:opacity-100"
-                        }`}
-                        title={`Preset Avatar ${idx + 1}`}
-                      >
-                        <img
-                          src={avatarUrl}
-                          referrerPolicy="no-referrer"
-                          className="h-full w-full object-cover"
-                          alt={`preset-${idx}`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>

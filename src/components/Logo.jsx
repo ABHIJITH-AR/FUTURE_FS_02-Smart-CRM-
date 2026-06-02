@@ -57,10 +57,10 @@ export default function Logo({ size = "md", className = "", showSubtitle = true 
         </h1>
         {showSubtitle && (
           <p 
-            className="font-display italic text-cyan-300 font-semibold leading-none mt-1.5 opacity-95"
+            className="font-display uppercase tracking-widest text-cyan-400 font-extrabold leading-none mt-1.5 opacity-90"
             style={{
-              fontSize: size === "sm" ? "10px" : size === "md" ? "12px" : "16px",
-              letterSpacing: "0.08em"
+              fontSize: size === "sm" ? "8px" : size === "md" ? "10px" : "13px",
+              letterSpacing: "0.12em"
             }}
           >
             Client Lead Management

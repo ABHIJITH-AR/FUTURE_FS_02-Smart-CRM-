@@ -377,7 +377,8 @@ export default function App() {
               onDeleteClient={handleDeleteClient}
               isAddModalOpen={isAddModalOpen}
               setIsAddModalOpen={setIsAddModalOpen}
-              onSeedClients={handleSeedClients}
+               onSeedClients={handleSeedClients}
+              setActiveTab={setActiveTab}
             />
           )}
 
@@ -386,6 +387,7 @@ export default function App() {
               user={user}
               clients={clients}
               token={token}
+              setActiveTab={setActiveTab}
             />
           )}
 
@@ -396,6 +398,7 @@ export default function App() {
               onChangePassword={handleChangePassword}
               setErrorAlert={(msg) => showToast(msg, "error")}
               setSuccessAlert={(msg) => showToast(msg, "success")}
+              setActiveTab={setActiveTab}
             />
           )}
         </main>

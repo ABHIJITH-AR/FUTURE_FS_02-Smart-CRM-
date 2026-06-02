@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, AlertCircle, Save, Key, ShieldCheck } from "lucide-react";
+import { User, AlertCircle, Save, Key, ShieldCheck, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function SettingsView({
@@ -8,6 +8,7 @@ export default function SettingsView({
   onChangePassword,
   setErrorAlert,
   setSuccessAlert,
+  setActiveTab,
 }) {
   // Profile Info form
   const [fullName, setFullName] = useState(user.fullName);
@@ -88,7 +89,16 @@ export default function SettingsView({
   };
 
   return (
-    <div className="space-y-8" id="settings-view">
+    <div className="space-y-6" id="settings-view">
+      {setActiveTab && (
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className="group inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-all duration-200 cursor-pointer"
+        >
+          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+          <span>Back to Dashboard</span>
+        </button>
+      )}
       {/* Header title */}
       <div>
         <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">

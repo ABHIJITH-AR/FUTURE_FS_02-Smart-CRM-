@@ -64,12 +64,15 @@ export default function AuthView({ onAuthSuccess, setErrorAlert, setSuccessAlert
         throw new Error(data.error || "Something went wrong. Please check your credentials.");
       }
 
-      setSuccessAlert(
-        isLogin 
-          ? "Signed in successfully! Welcome back to your CRM workspace." 
-          : "Registration completed successfully! Your new account has been created."
-      );
-      onAuthSuccess(data.token, data.user);
+      if (isLogin) {
+        setSuccessAlert("Signed in successfully! Welcome back to your CRM workspace.");
+        onAuthSuccess(data.token, data.user);
+      } else {
+        setSuccessAlert("You have registered successfully! Please sign in to access your CRM workspace.");
+        setIsLogin(true);
+        setPassword("");
+        setConfirmPassword("");
+      }
     } catch (error) {
       setFormError(error.message || "Network error. Please try again.");
       setErrorAlert(error.message || "Failed to authenticate.");
