@@ -10,7 +10,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { AlertCircle, CheckCircle2, Info, Loader2 } from "lucide-react";
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem("smart_crm_token"));
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("smart_crm_token") || sessionStorage.getItem("smart_crm_token") || null;
+  });
   const [user, setUser] = useState(null);
   const [clients, setClients] = useState([]);
 
@@ -63,6 +65,7 @@ export default function App() {
         } else {
           // Token is dead, discard silently
           localStorage.removeItem("smart_crm_token");
+          sessionStorage.removeItem("smart_crm_token");
           setToken(null);
         }
       } catch (err) {
@@ -95,8 +98,14 @@ export default function App() {
   };
 
   // AuthSuccess handler called from AuthView
-  const handleAuthSuccess = (newToken, authenticatedUser) => {
-    localStorage.setItem("smart_crm_token", newToken);
+  const handleAuthSuccess = (newToken, authenticatedUser, rememberMe) => {
+    if (rememberMe) {
+      localStorage.setItem("smart_crm_token", newToken);
+      sessionStorage.removeItem("smart_crm_token");
+    } else {
+      sessionStorage.setItem("smart_crm_token", newToken);
+      localStorage.removeItem("smart_crm_token");
+    }
     setToken(newToken);
     setUser(authenticatedUser);
     fetchClients(newToken);
@@ -116,6 +125,7 @@ export default function App() {
     }
 
     localStorage.removeItem("smart_crm_token");
+    sessionStorage.removeItem("smart_crm_token");
     setToken(null);
     setUser(null);
     setClients([]);
