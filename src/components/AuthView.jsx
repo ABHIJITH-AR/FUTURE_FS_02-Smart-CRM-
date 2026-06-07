@@ -69,7 +69,19 @@ export default function AuthView({ onAuthSuccess, setErrorAlert, setSuccessAlert
         setSuccessAlert("Signed in successfully! Welcome back to your CRM workspace.");
         onAuthSuccess(data.token, data.user, rememberMe);
       } else {
-        setSuccessAlert("You have registered successfully! Please sign in to access your CRM workspace.");
+        setSuccessAlert("You have registered successfully! Please sign in with your email and password.");
+        if (data.user) {
+          try {
+            const backupUsers = JSON.parse(localStorage.getItem("smart_crm_backup_users") || "[]");
+            const exists = backupUsers.some((u) => u.id === data.user.id);
+            if (!exists) {
+              backupUsers.push(data.user);
+              localStorage.setItem("smart_crm_backup_users", JSON.stringify(backupUsers));
+            }
+          } catch (e) {
+            console.error("Failed to backup registered user locally", e);
+          }
+        }
         setIsLogin(true);
         setPassword("");
         setConfirmPassword("");

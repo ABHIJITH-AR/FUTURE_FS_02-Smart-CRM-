@@ -186,7 +186,91 @@ app.post("/api/auth/register", (req, res) => {
       id: newUser.id,
       fullName: newUser.fullName,
       email: newUser.email,
+      passwordHash: newUser.passwordHash,
     },
+  });
+});
+
+// Sync endpoint to prevent data loss in ephemeral server environments (e.g. Render, server restarts)
+app.post("/api/auth/sync", (req, res) => {
+  const { users, clients, currentToken, currentUserId } = req.body;
+
+  let restoredUsersCount = 0;
+  let restoredClientsCount = 0;
+  let sessionRestored = false;
+
+  // 1. Restore missing users
+  if (Array.isArray(users)) {
+    const existingUsers = getUsers();
+    users.forEach((u) => {
+      if (u && u.id && u.email) {
+        const uEmail = u.email.toLowerCase().trim();
+        const exists = existingUsers.some(
+          (eu) => eu.id === u.id || eu.email.toLowerCase().trim() === uEmail
+        );
+        if (!exists) {
+          addUser({
+            id: u.id,
+            fullName: u.fullName || "Restored User",
+            email: uEmail,
+            passwordHash: u.passwordHash,
+            createdAt: u.createdAt || new Date().toISOString(),
+          });
+          restoredUsersCount++;
+        }
+      }
+    });
+  }
+
+  // 2. Restore missing client leads
+  if (Array.isArray(clients)) {
+    const existingClients = getClients();
+    clients.forEach((c) => {
+      if (c && c.id && c.userId) {
+        const exists = existingClients.some((ec) => ec.id === c.id);
+        if (!exists) {
+          addClient({
+            id: c.id,
+            userId: c.userId,
+            fullName: c.fullName || "Un-named Lead",
+            email: c.email || "",
+            phone: c.phone || "",
+            companyName: c.companyName || "",
+            status: c.status || "Pending",
+            createdAt: c.createdAt || new Date().toISOString(),
+            priority: c.priority || "Medium",
+            dealValue: typeof c.dealValue === "number" ? c.dealValue : 0,
+            leadSource: c.leadSource || "Website",
+            notes: c.notes || "",
+            photo: c.photo || "",
+          });
+          restoredClientsCount++;
+        }
+      }
+    });
+  }
+
+  // 3. Re-create sessions if currentToken belongs to an existing user but session is gone
+  if (currentToken && typeof currentToken === "string" && currentUserId) {
+    const existingSession = getSession(currentToken);
+    if (!existingSession) {
+      const userExists = getUsers().find((u) => u.id === currentUserId);
+      if (userExists) {
+        addSession({
+          token: currentToken,
+          userId: currentUserId,
+          expiresAt: new Date(Date.now() + 3600000 * 24 * 30).toISOString(), // extend session to 30 days
+        });
+        sessionRestored = true;
+      }
+    }
+  }
+
+  res.json({
+    success: true,
+    restoredUsersCount,
+    restoredClientsCount,
+    sessionRestored,
   });
 });
 
@@ -225,6 +309,7 @@ app.post("/api/auth/login", (req, res) => {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
+      passwordHash: user.passwordHash,
     },
   });
 });
