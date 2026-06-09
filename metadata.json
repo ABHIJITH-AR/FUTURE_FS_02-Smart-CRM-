@@ -1,6 +1,0 @@
-{
-  "name": "Smart CRM",
-  "description": "Smart CRM is a premium dark SaaS Client Lead Management System with real-time stats, secure session-based authentication, user profile management, search, filters, and polished animations.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
